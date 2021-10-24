@@ -32,6 +32,8 @@ c = Calendar()
 
 for row in sheet.iter_rows(min_row=START_ROW, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
     event = {}
+    event["col"] = row[0].row
+
     for cell in row:
         if ACADEMIC_PERIOD_COL in cell.coordinate:
             event['academic_period'] = cell.value
@@ -79,7 +81,7 @@ for event in events:
     while date <= event['end_date']:
         if date.isoweekday() in event['class_time'].keys():
             e = Event()
-            e.name = event['section']
+            e.name = f"{event['section']} ROW:{event['col']}"
             e.begin = datetime.combine(date, datetime.strptime(event['class_time'][date.isoweekday()]['start_time'], '%I:%M %p').time())
             e.end = datetime.combine(date, datetime.strptime(event['class_time'][date.isoweekday()]['end_time'], '%I:%M %p').time())
             c.events.add(e)
