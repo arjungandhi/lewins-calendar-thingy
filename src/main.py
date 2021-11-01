@@ -22,14 +22,17 @@ parser.add_argument('--file', help='The path to the excel file with the course d
 args = parser.parse_args()
 
 # load the excel workbook
+print('Reading file...')
 wb = load_workbook(args.file)
 sheet = wb.active
+print('File Parsed')
 
 # Read all the events from the workbook
 events = []
 
 c = Calendar()
 
+print('Reading courses from file')
 for row in sheet.iter_rows(min_row=START_ROW, max_row=sheet.max_row, min_col=1, max_col=sheet.max_column):
     event = {}
     event["col"] = row[0].row
@@ -51,6 +54,8 @@ for row in sheet.iter_rows(min_row=START_ROW, max_row=sheet.max_row, min_col=1, 
             event['end_date'] = cell.value
 
     events.append(event)
+
+print(f'Found {len(events)} courses')
 
 # parse the events to days of the week and times they happen
 for event in events:
@@ -76,6 +81,7 @@ for event in events:
 
 delta = timedelta(days=1)
 # convert the events to ics events
+print('Generating reoccuring events for each course')
 for event in events:
     date = event['start_date']
     while date <= event['end_date']:
@@ -87,8 +93,10 @@ for event in events:
             c.events.add(e)
         date += delta
 
+print(f'Generated {len(c.events)} calendar events')
 
 
+print('Writing events to ./events.ics')
 with open('events.ics', 'w') as f:
 
     for line in str(c).splitlines():
