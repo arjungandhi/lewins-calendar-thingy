@@ -12,6 +12,8 @@ CAPACITY_COL = 'E'
 START_DATE = 'Y'
 END_DATE = 'Z'
 
+TIMEZONE_ADJUST = 4
+
 DAYS = [ 'M', 'T', 'W', 'R', 'F']
 #constants
 START_ROW = 3
@@ -82,8 +84,8 @@ for event in events:
         if date.isoweekday() in event['class_time'].keys():
             e = Event()
             e.name = f"{event['section']} ROW:{event['col']}"
-            e.begin = datetime.combine(date, datetime.strptime(event['class_time'][date.isoweekday()]['start_time'], '%I:%M %p').time())
-            e.end = datetime.combine(date, datetime.strptime(event['class_time'][date.isoweekday()]['end_time'], '%I:%M %p').time())
+            e.begin = datetime.combine(date, datetime.strptime(event['class_time'][date.isoweekday()]['start_time'], '%I:%M %p').time() ) + timedelta(hours=TIMEZONE_ADJUST)
+            e.end = datetime.combine(date, datetime.strptime(event['class_time'][date.isoweekday()]['end_time'], '%I:%M %p').time()) + timedelta(hours=TIMEZONE_ADJUST)
             c.events.add(e)
         date += delta
 
