@@ -2,7 +2,8 @@ from openpyxl import load_workbook
 import os
 import argparse
 from ics import Calendar, Event
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
+import pytz
 
 ACADEMIC_PERIOD_COL = 'A'
 SECTION_COL = 'B'
@@ -12,7 +13,8 @@ CAPACITY_COL = 'E'
 START_DATE = 'Y'
 END_DATE = 'Z'
 
-TIMEZONE_ADJUST = 4
+timezone = pytz.timezone('US/Eastern')
+utc=pytz.utc
 
 DAYS = [ 'M', 'T', 'W', 'R', 'F']
 #constants
@@ -48,9 +50,9 @@ for row in sheet.iter_rows(min_row=START_ROW, max_row=sheet.max_row, min_col=1, 
         elif CAPACITY_COL in cell.coordinate:
             event['capacity'] = cell.value
         elif START_DATE in cell.coordinate:
-            event['start_date'] = cell.value
+            event['start_date'] = timezone.localize(cell.value)
         elif END_DATE in cell.coordinate:
-            event['end_date'] = cell.value
+            event['end_date'] = timezone.localize(cell.value)
 
     events.append(event)
 
@@ -84,8 +86,8 @@ for event in events:
         if date.isoweekday() in event['class_time'].keys():
             e = Event()
             e.name = f"{event['section']} ROW:{event['col']}"
-            e.begin = datetime.combine(date, datetime.strptime(event['class_time'][date.isoweekday()]['start_time'], '%I:%M %p').time() ) + timedelta(hours=TIMEZONE_ADJUST)
-            e.end = datetime.combine(date, datetime.strptime(event['class_time'][date.isoweekday()]['end_time'], '%I:%M %p').time()) + timedelta(hours=TIMEZONE_ADJUST)
+            e.begin = datetime.combine(date, datetime.strptime(event['class_time'][date.isoweekday()]['start_time'], '%I:%M %p').time()).astimezone(utc)
+            e.end = datetime.combine(date, datetime.strptime(event['class_time'][date.isoweekday()]['end_time'], '%I:%M %p').time()).astimezone(utc)
             c.events.add(e)
         date += delta
 
